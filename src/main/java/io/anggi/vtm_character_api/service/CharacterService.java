@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,22 +33,22 @@ public class CharacterService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<CharacterDTO> getCharacterById(Long id) {
+    public CharacterDTO getCharacter(Long id) {
         return characterRepository.findById(id)
-                .map(characterMapper::toDTO);
+                .map(characterMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Character not found"));
     }
 
     public CharacterDTO updateCharacter(Long id, CharacterDTO characterDTO) {
         Character character = characterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Character not found"));
 
-        character.setName(characterDTO.getName());
-        character.setClan(characterDTO.getClan());
-        character.setGeneration(characterDTO.getGeneration());
-        character.setBloodPotency(characterDTO.getBloodPotency());
+        // Update all fields
+        Character updatedCharacter = characterMapper.toEntity(characterDTO);
+        updatedCharacter.setId(id); // Ensure the ID is not changed
 
-        character = characterRepository.save(character);
-        return characterMapper.toDTO(character);
+        updatedCharacter = characterRepository.save(updatedCharacter);
+        return characterMapper.toDTO(updatedCharacter);
     }
 
     public void deleteCharacter(Long id) {
