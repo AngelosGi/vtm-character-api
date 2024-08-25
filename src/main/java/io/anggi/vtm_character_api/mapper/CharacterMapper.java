@@ -1,28 +1,45 @@
 package io.anggi.vtm_character_api.mapper;
 
-import io.anggi.vtm_character_api.dto.CharacterDTO;
+import io.anggi.vtm_character_api.dto.*;
+import io.anggi.vtm_character_api.model.*;
 import io.anggi.vtm_character_api.model.Character;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.MappingTarget;
 
-@Component
-public class CharacterMapper {
-    public CharacterDTO toDTO(Character character) {
-        CharacterDTO dto = new CharacterDTO();
-        dto.setId(character.getId());
-        dto.setName(character.getName());
-        dto.setClan(character.getClan());
-        dto.setGeneration(character.getGeneration());
-        dto.setBloodPotency(character.getBloodPotency());
-        return dto;
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface CharacterMapper {
+
+    @Mapping(target = "health", ignore = true)
+    @Mapping(target = "willpower", ignore = true)
+    CharacterDTO toDTO(Character character);
+
+    @AfterMapping
+    default void calculateDerivedAttributes(Character character, @MappingTarget CharacterDTO characterDTO) {
+        // Calculate health
+        characterDTO.setHealth(character.getAttributes().getPhysical().getStamina() + 3);
+
+        // Calculate willpower
+        characterDTO.setWillpower(
+                character.getAttributes().getSocial().getComposure() +
+                        character.getAttributes().getMental().getResolve()
+        );
     }
 
-    public Character toEntity(CharacterDTO dto) {
-        Character character = new Character();
-        character.setId(dto.getId());
-        character.setName(dto.getName());
-        character.setClan(dto.getClan());
-        character.setGeneration(dto.getGeneration());
-        character.setBloodPotency(dto.getBloodPotency());
-        return character;
-    }
+    Character toEntity(CharacterDTO characterDTO);
+
+    AttributesDTO attributesToDTO(Attributes attributes);
+    Attributes attributesToEntity(AttributesDTO attributesDTO);
+
+    SkillsDTO skillsToDTO(Skills skills);
+    Skills skillsToEntity(SkillsDTO skillsDTO);
+
+    TouchstoneConvictionDTO touchstoneConvictionToDTO(TouchstoneConviction touchstoneConviction);
+    TouchstoneConviction touchstoneConvictionToEntity(TouchstoneConvictionDTO touchstoneConvictionDTO);
+
+    List<TouchstoneConvictionDTO> touchstoneConvictionListToDTO(List<TouchstoneConviction> touchstoneConvictions);
+    List<TouchstoneConviction> touchstoneConvictionListToEntity(List<TouchstoneConvictionDTO> touchstoneConvictionDTOs);
 }
