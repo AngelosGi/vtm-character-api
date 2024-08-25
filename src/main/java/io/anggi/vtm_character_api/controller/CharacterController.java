@@ -36,14 +36,14 @@ public class CharacterController {
         return ResponseEntity.ok(characterService.getAllCharacters());
     }
 
+
+
     @GetMapping("/{id}")
     @Operation(summary = "Get a character by ID", description = "Retrieves a Vampire The Masquerade character by their ID")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved the character")
     @ApiResponse(responseCode = "404", description = "Character not found")
     public ResponseEntity<CharacterDTO> getCharacterById(@PathVariable Long id) {
-        return characterService.getCharacterById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(characterService.getCharacter(id));
     }
 
     @PutMapping("/{id}")
@@ -62,4 +62,6 @@ public class CharacterController {
         characterService.deleteCharacter(id);
         return ResponseEntity.ok().build();
     }
+
+    //add thymeleafe controler to display the character sheet.
 }
